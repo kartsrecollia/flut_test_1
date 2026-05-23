@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recollia — Medicine, remembered.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;1,9..144,200;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0A0A0A;
+            --bg-raised: #111010;
+            --amber:     #E89A4D;
+            --amber-dim: #9B5F1A;
+            --deep-red:  #7A1500;
+            --ivory:     #F5E9D7;
+            --ivory-dim: #8A7C6A;
+            --border:    rgba(232,154,77,0.13);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--ivory);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── NAV ─────────────────────────────────── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            padding: 1.4rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(10,10,10,0.94) 0%, transparent 100%);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: baseline;
+            gap: 0.9rem;
+            text-decoration: none;
+        }
+        .nav-wordmark {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 300;
+            font-size: 1.55rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ivory);
+        }
+        .nav-wordmark span { color: var(--amber); }
+        .nav-tagline {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-style: italic;
+            font-weight: 200;
+            font-size: 0.88rem;
+            color: var(--ivory-dim);
+            letter-spacing: 0.04em;
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            color: var(--ivory-dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--amber); }
+
+        .nav-cta {
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--amber);
+            border: 1px solid var(--amber-dim);
+            padding: 0.55rem 1.4rem;
+            text-decoration: none;
+            transition: background 0.3s, color 0.3s;
+        }
+        .nav-cta:hover { background: var(--amber); color: var(--bg); }
+
+        /* ── IRIS HERO ───────────────────────────── */
+        #iris-hero { position: relative; height: 700vh; }
+
+        #iris-sticky {
+            position: sticky;
+            top: 0; width: 100vw; height: 100vh;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg);
+        }
+
+        #iris-glow {
+            position: absolute;
+            width: 75vmin; height: 75vmin;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(122,21,0,0.3) 0%,
+                rgba(232,154,77,0.1) 38%,
+                transparent 70%
+            );
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        #iris-chroma-r, #iris-chroma-b {
+            position: absolute;
+            width: 60vmin; height: 60vmin;
+            opacity: 0; pointer-events: none;
+            will-change: transform, opacity;
+        }
+        #iris-chroma-r { mix-blend-mode: screen; }
+        #iris-chroma-b { mix-blend-mode: screen; }
+
+        #iris-svg {
+            position: absolute;
+            width: 62vmin; height: 62vmin;
+            overflow: visible;
+            will-change: transform, opacity;
+            animation: breathe 6s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%,100% { transform: scale(1); }
+            50%      { transform: scale(1.009); }
+        }
+
+        #hero-text {
+            position: absolute;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+            will-change: opacity, transform;
+        }
+        #hero-text h1 {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 200;
+            font-size: clamp(3rem, 8.5vw, 7rem);
+            letter-spacing: 0.02em;
+            line-height: 1.0;
+            margin-bottom: 1.1rem;
+        }
+        #hero-text h1 em {
+            font-style: italic;
+            color: var(--amber);
+            display: block;
+        }
+        #hero-text p {
+            font-size: 0.78rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--ivory-dim);
+        }
+
+        #scroll-cue {
+            position: absolute;
+            bottom: 2.5rem; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0.5rem;
+            pointer-events: none;
+            animation: scrollBob 2.6s ease-in-out infinite;
+        }
+        #scroll-cue span {
+            font-size: 0.65rem; letter-spacing: 0.22em;
+            text-transform: uppercase; color: var(--ivory-dim);
+        }
+        .cue-line {
+            width: 1px; height: 36px;
+            background: linear-gradient(to bottom, var(--amber), transparent);
+        }
+        @keyframes scrollBob {
+            0%,100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+            50%      { opacity: 1;   transform: translateX(-50%) translateY(7px); }
+        }
+
+        #iris-vignette {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 50%, transparent 28%, var(--bg) 100%);
+            pointer-events: none;
+            opacity: 0.55;
+            will-change: opacity;
+        }
+        #iris-blackout {
+            position: absolute; inset: 0;
+            background: var(--bg);
+            opacity: 0; pointer-events: none;
+            will-change: opacity;
+        }
+
+        /* ── TRANSITION QUOTE ────────────────────── */
+        .transition-quote {
+            background: var(--bg);
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .transition-quote::before {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(122,21,0,0.09) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .transition-quote blockquote {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 200; font-style: italic;
+            font-size: clamp(1.9rem, 4vw, 3.2rem);
+            line-height: 1.45;
+            max-width: 820px; margin: 0 auto 2rem;
+            color: var(--ivory);
+        }
+        .transition-quote blockquote em { font-style: normal; color: var(--amber); }
+        .quote-attr {
+            font-size: 0.7rem; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--ivory-dim);
+        }
+
+        /* ── DIVIDER ─────────────────────────────── */
+        .iris-divider { display: flex; justify-content: center; padding: 2rem 0; }
+        .iris-ring {
+            width: 72px; height: 72px; border-radius: 50%;
+            border: 1px solid var(--border);
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .iris-ring::before {
+            content: ''; position: absolute;
+            width: 48px; height: 48px; border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+        .iris-ring::after {
+            content: ''; width: 10px; height: 10px;
+            border-radius: 50%; background: var(--amber); opacity: 0.55;
+        }
+
+        /* ── SHARED LAYOUT ───────────────────────── */
+        .container { max-width: 1180px; margin: 0 auto; }
+
+        .section-label {
+            font-size: 0.7rem; letter-spacing: 0.32em;
+            text-transform: uppercase; color: var(--amber);
+            margin-bottom: 1.4rem;
+        }
+        .section-heading {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 200;
+            font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+            line-height: 1.12; margin-bottom: 2rem;
+        }
+        .section-heading em { font-style: italic; color: var(--amber); }
+        .section-body {
+            font-size: 0.97rem; line-height: 1.85;
+            color: var(--ivory-dim); font-weight: 300;
+        }
+        .section-body p + p { margin-top: 1.2rem; }
+
+        /* ── INTRO SECTION ───────────────────────── */
+        .section-intro { background: var(--bg-raised); padding: 8rem 2rem; }
+        .two-col {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 6rem; align-items: center;
+        }
+        .iris-illustration { aspect-ratio: 1; max-width: 360px; margin: 0 auto; }
+
+        /* ── MODES / CARDS ───────────────────────── */
+        .section-modes { background: var(--bg); padding: 8rem 2rem; }
+        .section-header { text-align: center; margin-bottom: 5rem; }
+
+        .modes-grid {
+            display: grid; grid-template-columns: repeat(3,1fr);
+            gap: 1.5px; background: var(--border);
+        }
+        .mode-card {
+            background: var(--bg); padding: 3rem 2.5rem;
+            position: relative; overflow: hidden;
+            transition: background 0.4s;
+        }
+        .mode-card:hover { background: var(--bg-raised); }
+        .mode-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(to right, transparent, var(--amber-dim), transparent);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .mode-card:hover::before { opacity: 1; }
+
+        .mode-icon {
+            width: 36px; height: 36px; margin-bottom: 2rem;
+            position: relative;
+        }
+        /* small iris mark as icon */
+        .mode-icon svg { width: 100%; height: 100%; }
+
+        .mode-title {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 300; font-size: 1.55rem;
+            margin-bottom: 1rem; color: var(--ivory);
+        }
+        .mode-body {
+            font-size: 0.88rem; line-height: 1.8;
+            color: var(--ivory-dim); font-weight: 300;
+        }
+        .mode-tag {
+            display: inline-block; margin-top: 1.5rem;
+            font-size: 0.65rem; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--amber);
+            border-bottom: 1px solid var(--amber-dim); padding-bottom: 2px;
+        }
+
+        /* ── IRIS MOMENT ─────────────────────────── */
+        /* earned appearance — full-width, centered, meaningful */
+        .iris-moment {
+            background: var(--bg);
+            padding: 7rem 2rem;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 3rem;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .iris-moment-svg {
+            width: min(360px, 72vmin);
+            height: min(360px, 72vmin);
+        }
+        .iris-moment-caption {
+            text-align: center;
+        }
+        .iris-moment-caption p {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-style: italic; font-weight: 200;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--ivory-dim);
+            letter-spacing: 0.02em;
+        }
+        .iris-moment-caption p em { color: var(--ivory); font-style: normal; }
+
+        /* ── STATS ───────────────────────────────── */
+        .section-stats { background: var(--bg-raised); padding: 5.5rem 2rem; }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 2rem; text-align: center;
+        }
+        .stat-value {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 200; font-size: clamp(2.4rem, 5vw, 4rem);
+            color: var(--amber); line-height: 1; margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.7rem; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--ivory-dim);
+        }
+
+        /* ── CTA ─────────────────────────────────── */
+        .section-cta {
+            background: var(--bg); padding: 10rem 2rem;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .cta-rings { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+        .cta-rings .r {
+            position: absolute; border-radius: 50%;
+            border: 1px solid rgba(232,154,77,0.05);
+            transform: translate(-50%,-50%);
+        }
+        .cta-content { position: relative; z-index: 1; }
+        .cta-eyeline {
+            font-size: 0.7rem; letter-spacing: 0.35em;
+            text-transform: uppercase; color: var(--amber); margin-bottom: 2rem;
+        }
+        .cta-heading {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 200; font-size: clamp(3rem, 7vw, 5.5rem);
+            line-height: 1.05; margin-bottom: 1rem;
+        }
+        .cta-heading em { font-style: italic; color: var(--amber); }
+        .cta-tagline {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-style: italic; font-weight: 200;
+            font-size: 1.1rem; color: var(--ivory-dim);
+            margin-bottom: 2.5rem; letter-spacing: 0.04em;
+        }
+        .cta-sub {
+            font-size: 0.97rem; color: var(--ivory-dim);
+            max-width: 480px; margin: 0 auto 3rem;
+            line-height: 1.75; font-weight: 300;
+        }
+        .btn-primary {
+            display: inline-block; padding: 1rem 3rem;
+            background: var(--amber); color: var(--bg);
+            text-decoration: none; font-size: 0.75rem;
+            letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .btn-primary:hover { background: #F0A85A; transform: translateY(-2px); }
+        .btn-ghost {
+            display: inline-block; margin-left: 1.5rem;
+            padding: 1rem 2.5rem; border: 1px solid var(--amber-dim);
+            color: var(--ivory-dim); text-decoration: none;
+            font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase;
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .btn-ghost:hover { border-color: var(--amber); color: var(--ivory); }
+
+        /* ── FOOTER ──────────────────────────────── */
+        footer {
+            background: var(--bg); padding: 4rem 3rem 2.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .footer-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3rem; }
+        .footer-wordmark {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 300; font-size: 1.7rem;
+            letter-spacing: 0.18em; text-transform: uppercase;
+        }
+        .footer-wordmark span { color: var(--amber); }
+        .footer-tagline {
+            margin-top: 0.4rem;
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-style: italic; font-weight: 200;
+            font-size: 0.85rem; color: var(--ivory-dim);
+            letter-spacing: 0.04em;
+        }
+        .footer-links { display: flex; gap: 4rem; }
+        .footer-col h4 {
+            font-size: 0.68rem; letter-spacing: 0.22em;
+            text-transform: uppercase; color: var(--amber); margin-bottom: 1rem;
+        }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li + li { margin-top: 0.6rem; }
+        .footer-col a {
+            color: var(--ivory-dim); text-decoration: none;
+            font-size: 0.83rem; font-weight: 300; transition: color 0.3s;
+        }
+        .footer-col a:hover { color: var(--ivory); }
+        .footer-bottom {
+            border-top: 1px solid var(--border); padding-top: 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-copy { font-size: 0.72rem; color: var(--ivory-dim); }
+        .footer-mark {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.7rem; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--ivory-dim);
+        }
+        .footer-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--amber); opacity: 0.55;
+        }
+
+        /* ── FADE-UP ─────────────────────────────── */
+        .fade-up {
+            opacity: 0; transform: translateY(28px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── RESPONSIVE ──────────────────────────── */
+        @media (max-width: 900px) {
+            nav { padding: 1.2rem 1.5rem; }
+            .nav-links { display: none; }
+            .nav-tagline { display: none; }
+            .two-col { grid-template-columns: 1fr; gap: 3rem; }
+            .modes-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
+            .footer-top { flex-direction: column; gap: 2.5rem; }
+            .footer-links { gap: 2rem; flex-wrap: wrap; }
+            .btn-ghost { margin-left: 0; margin-top: 1rem; display: block; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────── -->
+<nav>
+    <a href="#" class="nav-brand">
+        <span class="nav-wordmark">Rec<span>o</span>llia</span>
+        <span class="nav-tagline">Medicine, remembered.</span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#vision">Vision</a></li>
+        <li><a href="#contact">Begin</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Start studying</a>
+</nav>
+
+<!-- ── IRIS HERO ─────────────────────────────── -->
+<section id="iris-hero">
+    <div id="iris-sticky">
+        <div id="iris-glow"></div>
+
+        <!-- chromatic ghost layers — injected via JS -->
+        <svg id="iris-chroma-r" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="iris-chroma-b" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"></svg>
+
+        <!-- MAIN IRIS SVG — 72 spokes injected via JS -->
+        <svg id="iris-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+            <defs>
+                <radialGradient id="iG" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"   stop-color="#7A1500" stop-opacity="0.95"/>
+                    <stop offset="28%"  stop-color="#B84A08" stop-opacity="0.9"/>
+                    <stop offset="58%"  stop-color="#E89A4D" stop-opacity="0.78"/>
+                    <stop offset="100%" stop-color="#1E0A00" stop-opacity="0.65"/>
+                </radialGradient>
+                <radialGradient id="pG" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"   stop-color="#000000"/>
+                    <stop offset="72%"  stop-color="#060302"/>
+                    <stop offset="100%" stop-color="#100600" stop-opacity="0.9"/>
+                </radialGradient>
+                <clipPath id="iC"><circle cx="200" cy="200" r="168"/></clipPath>
+            </defs>
+
+            <!-- halo rings -->
+            <circle id="halo1" cx="200" cy="200" r="192"
+                fill="none" stroke="rgba(122,21,0,0.12)" stroke-width="1"
+                stroke-dasharray="1206" stroke-dashoffset="1206"/>
+            <circle id="halo2" cx="200" cy="200" r="179"
+                fill="none" stroke="rgba(122,21,0,0.07)" stroke-width="1"
+                stroke-dasharray="1125" stroke-dashoffset="1125"/>
+
+            <!-- iris fill -->
+            <circle id="iris-body" cx="200" cy="200" r="168" fill="url(#iG)" opacity="0"/>
+
+            <!-- 72 spokes — built by JS, inserted here -->
+            <g id="spokes-group" clip-path="url(#iC)" opacity="0"></g>
+
+            <!-- concentric rings -->
+            <circle id="ring1" cx="200" cy="200" r="156"
+                fill="none" stroke="rgba(232,154,77,0.16)" stroke-width="1"
+                stroke-dasharray="980"  stroke-dashoffset="980"/>
+            <circle id="ring2" cx="200" cy="200" r="142"
+                fill="none" stroke="rgba(232,154,77,0.20)" stroke-width="1"
+                stroke-dasharray="892"  stroke-dashoffset="892"/>
+            <circle id="ring3" cx="200" cy="200" r="122"
+                fill="none" stroke="rgba(184,74,8,0.26)"  stroke-width="1"
+                stroke-dasharray="767"  stroke-dashoffset="767"/>
+            <circle id="ring4" cx="200" cy="200" r="102"
+                fill="none" stroke="rgba(184,74,8,0.3)"   stroke-width="1"
+                stroke-dasharray="641"  stroke-dashoffset="641"/>
+            <circle id="ring5" cx="200" cy="200" r="84"
+                fill="none" stroke="rgba(122,21,0,0.36)"  stroke-width="1"
+                stroke-dasharray="528"  stroke-dashoffset="528"/>
+            <circle id="ring6" cx="200" cy="200" r="69"
+                fill="none" stroke="rgba(122,21,0,0.44)"  stroke-width="1.2"
+                stroke-dasharray="433"  stroke-dashoffset="433"/>
+
+            <!-- pupil -->
+            <circle id="pupil-outer" cx="200" cy="200" r="62" fill="url(#pG)" opacity="0"/>
+            <circle id="pupil-core"  cx="200" cy="200" r="56" fill="#000000"  opacity="0"/>
+
+            <!-- specular -->
+            <ellipse id="specular" cx="179" cy="183" rx="6.5" ry="4"
+                fill="rgba(245,233,215,0.07)" transform="rotate(-22,179,183)" opacity="0"/>
+        </svg>
+
+        <!-- hero text -->
+        <div id="hero-text">
+            <h1>Medicine,<em>remembered.</em></h1>
+            <p>For doctors who study at the edge of their limits</p>
+        </div>
+
+        <div id="scroll-cue">
+            <span>Scroll</span>
+            <div class="cue-line"></div>
+        </div>
+
+        <div id="iris-vignette"></div>
+        <div id="iris-blackout"></div>
+    </div>
+</section>
+
+<!-- ── TRANSITION QUOTE ───────────────────────── -->
+<div class="transition-quote fade-up">
+    <blockquote>
+        "72 facts in every case.<br>
+        <em>One</em> saves the life."
+    </blockquote>
+    <p class="quote-attr">The white line — Recollia</p>
+</div>
+
+<div class="iris-divider"><div class="iris-ring"></div></div>
+
+<!-- ── INTRO / VISION ─────────────────────────── -->
+<section class="section-intro" id="vision">
+    <div class="container">
+        <div class="two-col">
+            <div class="fade-up">
+                <p class="section-label">What is Recollia</p>
+                <h2 class="section-heading">
+                    The product that<br><em>remembers,</em><br>so you can understand.
+                </h2>
+                <div class="section-body">
+                    <p>Medicine is not about memorising facts. It is about having the right fact available at the right moment — so that understanding, judgement, and action can follow. Recollia holds the facts so your mind is free to do the work that only a doctor can do.</p>
+                    <p>Built for the Indian medical register. Calibrated to the senior clinician's voice. Designed for long study sessions where ivory on dark is not a style choice — it is a decision about your eyes at 11 p.m.</p>
+                </div>
+            </div>
+
+            <!-- decorative iris (72-spoke, built by JS) -->
+            <div class="iris-illustration fade-up" id="deco-iris-wrap">
+                <svg id="deco-iris" viewBox="0 0 400 400" width="100%" height="100%">
+                    <defs>
+                        <radialGradient id="iG2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"   stop-color="#7A1500" stop-opacity="0.9"/>
+                            <stop offset="30%"  stop-color="#B84A08" stop-opacity="0.85"/>
+                            <stop offset="62%"  stop-color="#E89A4D" stop-opacity="0.75"/>
+                            <stop offset="100%" stop-color="#2A1000" stop-opacity="0.6"/>
+                        </radialGradient>
+                        <radialGradient id="pG2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"  stop-color="#000"/>
+                            <stop offset="80%" stop-color="#080402"/>
+                        </radialGradient>
+                        <clipPath id="iC2"><circle cx="200" cy="200" r="168"/></clipPath>
+                    </defs>
+                    <circle cx="200" cy="200" r="192" fill="none" stroke="rgba(122,21,0,0.12)" stroke-width="1"/>
+                    <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(122,21,0,0.07)"  stroke-width="1"/>
+                    <circle cx="200" cy="200" r="168" fill="url(#iG2)"/>
+                    <!-- spokes inserted by JS -->
+                    <g id="deco-spokes" clip-path="url(#iC2)"></g>
+                    <circle cx="200" cy="200" r="135" fill="none" stroke="rgba(232,154,77,0.18)" stroke-width="1"/>
+                    <circle cx="200" cy="200" r="108" fill="none" stroke="rgba(184,74,8,0.24)"   stroke-width="1"/>
+                    <circle cx="200" cy="200" r="82"  fill="none" stroke="rgba(122,21,0,0.32)"   stroke-width="1"/>
+                    <circle cx="200" cy="200" r="64"  fill="url(#pG2)"/>
+                    <circle cx="200" cy="200" r="58"  fill="#000"/>
+                    <ellipse cx="179" cy="183" rx="7" ry="4.5" fill="rgba(245,233,215,0.06)" transform="rotate(-22,179,183)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="iris-divider"><div class="iris-ring"></div></div>
+
+<!-- ── HOW IT WORKS ───────────────────────────── -->
+<section class="section-modes" id="how">
+    <div class="container">
+        <div class="section-header fade-up">
+            <p class="section-label">How it works</p>
+            <h2 class="section-heading">Three ways to <em>go deeper</em></h2>
+        </div>
+        <div class="modes-grid">
+
+            <div class="mode-card fade-up">
+                <div class="mode-icon">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="18" cy="18" r="16" stroke="rgba(232,154,77,0.35)" stroke-width="1"/>
+                        <circle cx="18" cy="18" r="10" stroke="rgba(232,154,77,0.5)"  stroke-width="1"/>
+                        <circle cx="18" cy="18" r="4"  fill="rgba(232,154,77,0.7)"/>
+                        <line x1="18" y1="2"  x2="18" y2="8"  stroke="rgba(232,154,77,0.5)" stroke-width="0.8"/>
+                        <line x1="18" y1="28" x2="18" y2="34" stroke="rgba(232,154,77,0.5)" stroke-width="0.8"/>
+                        <line x1="2"  y1="18" x2="8"  y2="18" stroke="rgba(232,154,77,0.5)" stroke-width="0.8"/>
+                        <line x1="28" y1="18" x2="34" y2="18" stroke="rgba(232,154,77,0.5)" stroke-width="0.8"/>
+                    </svg>
+                </div>
+                <h3 class="mode-title">Quick Recall</h3>
+                <p class="mode-body">Targeted spaced-repetition cards built from your weak zones. A five-minute round before ward rounds. The facts you need — not the ones you already know.</p>
+                <span class="mode-tag">Active recall · Spaced repetition</span>
+            </div>
+
+            <div class="mode-card fade-up">
+                <div class="mode-icon">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="18" cy="18" r="16" stroke="rgba(232,154,77,0.35)" stroke-width="1"/>
+                        <circle cx="18" cy="18" r="10" stroke="rgba(232,154,77,0.5)"  stroke-width="1"/>
+                        <circle cx="18" cy="18" r="4"  fill="rgba(122,21,0,0.8)"/>
+                        <!-- radial lines suggesting depth -->
+                        <line x1="18" y1="2"  x2="18" y2="14" stroke="rgba(232,154,77,0.6)" stroke-width="0.8"/>
+                        <line x1="18" y1="22" x2="18" y2="34" stroke="rgba(232,154,77,0.6)" stroke-width="0.8"/>
+                        <line x1="2"  y1="18" x2="14" y2="18" stroke="rgba(232,154,77,0.6)" stroke-width="0.8"/>
+                        <line x1="22" y1="18" x2="34" y2="18" stroke="rgba(232,154,77,0.6)" stroke-width="0.8"/>
+                        <line x1="6.1" y1="6.1" x2="14.5" y2="14.5" stroke="rgba(232,154,77,0.4)" stroke-width="0.6"/>
+                        <line x1="21.5" y1="21.5" x2="29.9" y2="29.9" stroke="rgba(232,154,77,0.4)" stroke-width="0.6"/>
+                    </svg>
+                </div>
+                <h3 class="mode-title">Deep Understanding</h3>
+                <p class="mode-body">Socratic dialogue with a tutor calibrated to the senior consultant's register. Ask why a treatment works. Argue a diagnosis. Be challenged without being condescended to.</p>
+                <span class="mode-tag">Concept depth · Clinical reasoning</span>
+            </div>
+
+            <div class="mode-card fade-up">
+                <div class="mode-icon">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="18" cy="18" r="16" stroke="rgba(232,154,77,0.35)" stroke-width="1"/>
+                        <!-- clock hands suggesting a daily plan -->
+                        <line x1="18" y1="18" x2="18" y2="8"  stroke="rgba(232,154,77,0.8)" stroke-width="1" stroke-linecap="round"/>
+                        <line x1="18" y1="18" x2="25" y2="22" stroke="rgba(232,154,77,0.5)" stroke-width="0.8" stroke-linecap="round"/>
+                        <circle cx="18" cy="18" r="1.5" fill="rgba(232,154,77,0.8)"/>
+                    </svg>
+                </div>
+                <h3 class="mode-title">Daily Plan</h3>
+                <p class="mode-body">A structured study day that accounts for your exam date, your current gaps, and your available hours. Adapts when yesterday's plan slipped. Never guilts you — adjusts instead.</p>
+                <span class="mode-tag">Adaptive scheduling · Exam-aware</span>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── IRIS MOMENT ─────────────────────────────── -->
+<!-- earned, meaningful — not decoration -->
+<section class="iris-moment fade-up">
+    <svg class="iris-moment-svg" id="moment-iris" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="iG3" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="#7A1500" stop-opacity="0.95"/>
+                <stop offset="28%"  stop-color="#B84A08" stop-opacity="0.9"/>
+                <stop offset="58%"  stop-color="#E89A4D" stop-opacity="0.78"/>
+                <stop offset="100%" stop-color="#1E0A00" stop-opacity="0.6"/>
+            </radialGradient>
+            <radialGradient id="pG3" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"  stop-color="#000"/>
+                <stop offset="78%" stop-color="#060302"/>
+            </radialGradient>
+            <clipPath id="iC3"><circle cx="200" cy="200" r="168"/></clipPath>
+        </defs>
+        <circle cx="200" cy="200" r="192" fill="none" stroke="rgba(122,21,0,0.1)"  stroke-width="1"/>
+        <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(122,21,0,0.07)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="168" fill="url(#iG3)"/>
+        <!-- spokes inserted by JS -->
+        <g id="moment-spokes" clip-path="url(#iC3)"></g>
+        <circle cx="200" cy="200" r="138" fill="none" stroke="rgba(232,154,77,0.17)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="110" fill="none" stroke="rgba(184,74,8,0.22)"   stroke-width="1"/>
+        <circle cx="200" cy="200" r="85"  fill="none" stroke="rgba(122,21,0,0.3)"    stroke-width="1"/>
+        <circle cx="200" cy="200" r="64"  fill="url(#pG3)"/>
+        <circle cx="200" cy="200" r="58"  fill="#000"/>
+        <ellipse cx="179" cy="183" rx="7.5" ry="4.5" fill="rgba(245,233,215,0.06)" transform="rotate(-22,179,183)"/>
+    </svg>
+    <div class="iris-moment-caption">
+        <p><em>Topic mastered.</em> This is what it feels like.</p>
+    </div>
+</section>
+
+<!-- ── STATS ──────────────────────────────────── -->
+<section class="section-stats fade-up">
+    <div class="container">
+        <div class="stats-grid">
+            <div><div class="stat-value">72</div><div class="stat-label">Lines in every iris</div></div>
+            <div><div class="stat-value">01</div><div class="stat-label">White. The one that matters.</div></div>
+            <div><div class="stat-value">∞</div><div class="stat-label">Cases. One principle.</div></div>
+            <div><div class="stat-value">0</div><div class="stat-label">Facts forgotten twice.</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────── -->
+<section class="section-cta" id="contact">
+    <div class="cta-rings">
+        <div class="r" style="width:800px;height:800px;top:50%;left:50%"></div>
+        <div class="r" style="width:580px;height:580px;top:50%;left:50%"></div>
+        <div class="r" style="width:380px;height:380px;top:50%;left:50%"></div>
+        <div class="r" style="width:220px;height:220px;top:50%;left:50%"></div>
+    </div>
+    <div class="cta-content fade-up">
+        <p class="cta-eyeline">Begin your preparation</p>
+        <h2 class="cta-heading">The iris is<br><em>open.</em></h2>
+        <p class="cta-tagline">Medicine, remembered.</p>
+        <p class="cta-sub">Recollia is built for doctors and medical students who need a tutor that understands their register, their exam, and their hours.</p>
+        <div>
+            <a href="mailto:karthikeyan@recollia.ai" class="btn-primary">Request early access</a>
+            <a href="#vision" class="btn-ghost">Learn more</a>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+    <div class="container">
+        <div class="footer-top">
+            <div>
+                <div class="footer-wordmark">Rec<span>o</span>llia</div>
+                <div class="footer-tagline">Medicine, remembered.</div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Quick Recall</a></li>
+                        <li><a href="#">Deep Understanding</a></li>
+                        <li><a href="#">Daily Plan</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Vision</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:karthikeyan@recollia.ai">karthikeyan@recollia.ai</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copy">© 2026 Recollia. All rights reserved.</p>
+            <div class="footer-mark">
+                <div class="footer-dot"></div>
+                Medicine, remembered.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ── SCRIPTS ────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+// ── BUILD 72 SPOKES ──────────────────────────────
+// Called for any SVG group element, cx/cy = center, r = spoke reach
+function buildSpokes(groupEl, cx, cy, r, whiteAngleDeg) {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    for (let i = 0; i < 72; i++) {
+        const deg = i * 5; // 0,5,10,...355
+        const line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1', cx);
+        line.setAttribute('y1', cy);
+
+        // endpoint before rotation
+        line.setAttribute('x2', cx);
+        line.setAttribute('y2', cy - r);
+        line.setAttribute('transform', `rotate(${deg},${cx},${cy})`);
+
+        if (deg === whiteAngleDeg) {
+            // THE WHITE LINE
+            line.setAttribute('stroke', 'rgba(245,233,215,0.92)');
+            line.setAttribute('stroke-width', '0.9');
+        } else if (deg % 45 === 0) {
+            // 8 major amber spokes (excluding white at 90)
+            line.setAttribute('stroke', 'rgba(232,154,77,0.42)');
+            line.setAttribute('stroke-width', '0.65');
+        } else if (deg % 15 === 0) {
+            // 16 secondary amber spokes
+            line.setAttribute('stroke', 'rgba(184,74,8,0.28)');
+            line.setAttribute('stroke-width', '0.45');
+        } else if (deg % 5 === 0 && deg % 15 !== 0 && i % 3 === 0) {
+            // tertiary — visible texture
+            line.setAttribute('stroke', 'rgba(122,21,0,0.22)');
+            line.setAttribute('stroke-width', '0.38');
+        } else {
+            // fine density — near invisible, just texture
+            line.setAttribute('stroke', 'rgba(80,12,0,0.13)');
+            line.setAttribute('stroke-width', '0.3');
+        }
+
+        groupEl.appendChild(line);
+    }
+}
+
+// inject spokes into hero, deco, and moment irises
+buildSpokes(document.getElementById('spokes-group'),  200, 200, 168, 90);
+buildSpokes(document.getElementById('deco-spokes'),   200, 200, 168, 90);
+buildSpokes(document.getElementById('moment-spokes'), 200, 200, 168, 90);
+
+// inject chromatic ghost rings
+(function buildChroma() {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const rData = [
+        { r: 156, sw: 1.5 },
+        { r: 122, sw: 1   },
+        { r: 84,  sw: 1   },
+    ];
+    const cr = document.getElementById('iris-chroma-r');
+    const cb = document.getElementById('iris-chroma-b');
+    rData.forEach(d => {
+        const cR = document.createElementNS(svgNS, 'circle');
+        cR.setAttribute('cx', 200); cR.setAttribute('cy', 200);
+        cR.setAttribute('r', d.r);
+        cR.setAttribute('fill', 'none');
+        cR.setAttribute('stroke', 'rgba(255,80,0,0.3)');
+        cR.setAttribute('stroke-width', d.sw);
+        cr.appendChild(cR);
+
+        const cB = document.createElementNS(svgNS, 'circle');
+        cB.setAttribute('cx', 200); cB.setAttribute('cy', 200);
+        cB.setAttribute('r', d.r);
+        cB.setAttribute('fill', 'none');
+        cB.setAttribute('stroke', 'rgba(0,60,220,0.22)');
+        cB.setAttribute('stroke-width', d.sw);
+        cb.appendChild(cB);
+    });
+})();
+
+// ── GSAP SETUP ───────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+const $ = id => document.getElementById(id);
+
+const iris     = $('iris-svg');
+const glow     = $('iris-glow');
+const chromaR  = $('iris-chroma-r');
+const chromaB  = $('iris-chroma-b');
+const heroTxt  = $('hero-text');
+const cueTxt   = $('scroll-cue');
+const blackout = $('iris-blackout');
+const vignette = $('iris-vignette');
+const spokes   = $('spokes-group');
+
+// ── ENTRY ANIMATION ──────────────────────────────
+const entry = gsap.timeline({ delay: 0.3 });
+
+entry.to([$('halo1'),$('halo2')], {
+    strokeDashoffset: 0, duration: 1.3, stagger: 0.2, ease: 'power2.out'
+}, 0);
+entry.to($('iris-body'), { opacity: 1, duration: 1.0, ease: 'power1.in' }, 0.4);
+entry.to([$('ring1'),$('ring2'),$('ring3'),$('ring4'),$('ring5'),$('ring6')], {
+    strokeDashoffset: 0, duration: 0.9, stagger: 0.11, ease: 'power2.out'
+}, 0.55);
+entry.to(spokes, { opacity: 1, duration: 1.0, ease: 'power1.out' }, 1.0);
+entry.to([$('pupil-outer'),$('pupil-core')], {
+    opacity: 1, duration: 0.65, stagger: 0.1, ease: 'power2.in'
+}, 1.35);
+entry.to($('specular'), { opacity: 1, duration: 0.4 }, 1.85);
+entry.to(glow, { opacity: 1, duration: 1.2, ease: 'power1.out' }, 0.8);
+entry.from(heroTxt, { y: 22, opacity: 0, duration: 1.1, ease: 'power2.out' }, 1.55);
+entry.from(cueTxt,  { opacity: 0, duration: 0.8, ease: 'power1.out' }, 2.3);
+
+// ── SCROLL STAGES ────────────────────────────────
+const hero = $('iris-hero');
+
+// Stage 1 (0→20%) — grow, fill viewport
+ScrollTrigger.create({
+    trigger: hero, start: 'top top', end: '20% top', scrub: 1.2,
+    onUpdate(self) {
+        const p = self.progress;
+        const s = 1 + p * 1.8;
+        gsap.set(iris,    { scale: s });
+        gsap.set(glow,    { scale: s * 0.9, opacity: 1 - p * 0.2 });
+        gsap.set(heroTxt, { opacity: Math.max(0, 1 - p * 3.5) });
+        gsap.set(cueTxt,  { opacity: Math.max(0, 1 - p * 4) });
+        glow.style.background = `radial-gradient(circle,
+            rgba(122,21,0,${0.3 + p * 0.3}) 0%,
+            rgba(232,154,77,${0.1 + p * 0.14}) 38%,
+            transparent 70%)`;
+    }
+});
+
+// Stage 2 (20→50%) — push through outer rings, blur builds
+ScrollTrigger.create({
+    trigger: hero, start: '20% top', end: '50% top', scrub: 1.4,
+    onUpdate(self) {
+        const p = self.progress;
+        const s = 2.8 + p * 3.5;
+        gsap.set(iris, { scale: s });
+        iris.style.filter = `blur(${p * 1.4}px)`;
+        gsap.set(vignette, { opacity: 0.55 + p * 0.38 });
+    }
+});
+
+// Stage 3 (50→75%) — chromatic split, pupil takes over
+ScrollTrigger.create({
+    trigger: hero, start: '50% top', end: '75% top', scrub: 1.4,
+    onUpdate(self) {
+        const p = self.progress;
+        const s = 6.3 + p * 5;
+        gsap.set(iris, { scale: s });
+        const offset = p * 30;
+        gsap.set(chromaR, { scale: s * 0.98, x: offset,  y: -offset * 0.4, opacity: p * 0.5  });
+        gsap.set(chromaB, { scale: s * 0.98, x: -offset, y:  offset * 0.4, opacity: p * 0.42 });
+        glow.style.background = `radial-gradient(circle,
+            rgba(122,21,0,${0.6 + p * 0.35}) 0%,
+            rgba(60,8,0,${0.25 + p * 0.3}) 50%,
+            transparent 75%)`;
+        gsap.set(glow, { scale: s * 0.3, opacity: 0.8 + p * 0.2 });
+        iris.style.filter = `blur(${1.4 + p * 2.8}px)`;
+    }
+});
+
+// Stage 4 (75→95%) — blackout
+ScrollTrigger.create({
+    trigger: hero, start: '75% top', end: '95% top', scrub: 1.2,
+    onUpdate(self) {
+        const p = self.progress;
+        gsap.set(blackout, { opacity: p });
+        gsap.set(chromaR,  { opacity: (1 - p) * 0.5 });
+        gsap.set(chromaB,  { opacity: (1 - p) * 0.42 });
+    }
+});
+
+// ── SCROLL FADE-UP OBSERVER ──────────────────────
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.14 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

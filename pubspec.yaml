@@ -1,19 +1,42 @@
 name: flut_test_1
-description: "A new Flutter project."
+description: "Flutter MVVM demo — BLoC/Cubit, GoRouter, ScreenUtil, Dio."
 publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: ^3.11.5
+  sdk: ^3.5.0
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # State management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Navigation
+  go_router: ^14.6.1
+
+  # Responsive sizing
+  flutter_screenutil: ^5.9.3
+
+  # Networking
+  dio: ^5.7.0
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Local persistence (onboarding flag)
+  shared_preferences: ^2.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^4.0.0
+
+  # Testing
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

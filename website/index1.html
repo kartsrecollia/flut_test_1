@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recollia — See Beyond</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;1,200;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #070503;
+            --bg-warm:   #0e0905;
+            --amber:     #E8821A;
+            --amber-dim: #9B4F08;
+            --deep-red:  #8B1A00;
+            --text:      #F0E2CC;
+            --text-dim:  #8B7260;
+            --border:    rgba(232,130,26,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── NAV ─────────────────────────────────── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            padding: 1.5rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(7,5,3,0.92) 0%, transparent 100%);
+        }
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200;
+            font-size: 1.6rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .logo span { color: var(--amber); }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--amber); }
+        .nav-cta {
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--amber);
+            border: 1px solid var(--amber-dim);
+            padding: 0.55rem 1.4rem;
+            text-decoration: none;
+            transition: background 0.3s, color 0.3s;
+        }
+        .nav-cta:hover { background: var(--amber); color: var(--bg); }
+
+        /* ── IRIS HERO ───────────────────────────── */
+        #iris-hero {
+            position: relative;
+            height: 700vh; /* scroll canvas */
+        }
+
+        #iris-sticky {
+            position: sticky;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+
+        /* ambient glow behind iris */
+        #iris-glow {
+            position: absolute;
+            width: 80vmin;
+            height: 80vmin;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(139,26,0,0.35) 0%,
+                rgba(232,130,26,0.12) 35%,
+                transparent 70%
+            );
+            opacity: 0;
+            will-change: transform, opacity;
+            pointer-events: none;
+        }
+
+        /* chromatic ghost layers */
+        #iris-chroma-r,
+        #iris-chroma-b {
+            position: absolute;
+            width: 60vmin;
+            height: 60vmin;
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        #iris-chroma-r { mix-blend-mode: screen; }
+        #iris-chroma-b { mix-blend-mode: screen; }
+
+        /* main SVG iris */
+        #iris-svg {
+            position: absolute;
+            width: 60vmin;
+            height: 60vmin;
+            will-change: transform, opacity;
+            overflow: visible;
+        }
+
+        /* hero text */
+        #hero-text {
+            position: absolute;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+            will-change: opacity, transform;
+        }
+        #hero-text h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            letter-spacing: 0.06em;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+        }
+        #hero-text h1 em { font-style: italic; color: var(--amber); }
+        #hero-text p {
+            font-size: 0.8rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        /* scroll cue */
+        #scroll-cue {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: none;
+            animation: scrollBob 2.4s ease-in-out infinite;
+        }
+        #scroll-cue span {
+            font-size: 0.68rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+        .cue-line {
+            width: 1px; height: 36px;
+            background: linear-gradient(to bottom, var(--amber), transparent);
+        }
+        @keyframes scrollBob {
+            0%,100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
+            50%      { opacity: 1;    transform: translateX(-50%) translateY(7px); }
+        }
+
+        /* vignette that intensifies on scroll */
+        #iris-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, transparent 30%, var(--bg) 100%);
+            pointer-events: none;
+            opacity: 0.5;
+            will-change: opacity;
+        }
+
+        /* full-black overlay for final fade */
+        #iris-blackout {
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            opacity: 0;
+            pointer-events: none;
+            will-change: opacity;
+        }
+
+        /* ── SVG ring animation classes ─────────── */
+        .iris-ring-path { fill: none; stroke-linecap: round; }
+
+        /* draw-in animation via stroke-dashoffset */
+        @keyframes drawRing {
+            from { stroke-dashoffset: var(--circ); }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes breathe {
+            0%,100% { transform: scale(1); }
+            50%      { transform: scale(1.012); }
+        }
+        #iris-svg { animation: breathe 5s ease-in-out infinite; }
+
+        /* fiber group rotations (CSS, overridden by GSAP on scroll) */
+        #fibers-outer { transform-origin: 200px 200px; animation: rotOuter 50s linear infinite; }
+        #fibers-mid   { transform-origin: 200px 200px; animation: rotMid   70s linear infinite reverse; }
+        #fibers-inner { transform-origin: 200px 200px; animation: rotInner 100s linear infinite; }
+        @keyframes rotOuter  { to { transform: rotate(360deg); } }
+        @keyframes rotMid    { to { transform: rotate(360deg); } }
+        @keyframes rotInner  { to { transform: rotate(360deg); } }
+
+        /* ── TRANSITION QUOTE ────────────────────── */
+        .transition-quote {
+            background: var(--bg);
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .transition-quote::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139,26,0,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .transition-quote blockquote {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200;
+            font-style: italic;
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            line-height: 1.4;
+            max-width: 900px;
+            margin: 0 auto 2rem;
+        }
+        .transition-quote blockquote em { font-style: normal; color: var(--amber); }
+        .quote-attr {
+            font-size: 0.72rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        /* ── IRIS RING DIVIDER ───────────────────── */
+        .iris-divider { display: flex; justify-content: center; padding: 2rem 0; }
+        .iris-ring {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .iris-ring::before {
+            content: '';
+            position: absolute;
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+        .iris-ring::after {
+            content: '';
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--amber);
+            opacity: 0.6;
+        }
+
+        /* ── SHARED SECTION STYLES ───────────────── */
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: 1.5rem;
+        }
+        .section-heading {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.15;
+            margin-bottom: 2rem;
+        }
+        .section-heading em { font-style: italic; color: var(--amber); }
+        .section-body {
+            font-size: 1rem; line-height: 1.8;
+            color: var(--text-dim); font-weight: 300;
+        }
+        .section-body p + p { margin-top: 1.2rem; }
+
+        /* ── INTRO SECTION ───────────────────────── */
+        .section-intro {
+            background: var(--bg-warm);
+            padding: 8rem 2rem;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        /* inline iris illustration (smaller, decorative) */
+        .iris-illustration { aspect-ratio: 1; max-width: 380px; margin: 0 auto; }
+
+        /* ── CAPABILITIES ────────────────────────── */
+        .section-capabilities { background: var(--bg); padding: 8rem 2rem; }
+        .section-header { text-align: center; margin-bottom: 5rem; }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5px;
+            background: var(--border);
+        }
+        .cap-card {
+            background: var(--bg);
+            padding: 3rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.4s;
+        }
+        .cap-card:hover { background: var(--bg-warm); }
+        .cap-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--amber-dim), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .cap-card:hover::before { opacity: 1; }
+        .cap-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem; font-weight: 200;
+            color: var(--deep-red); opacity: 0.4;
+            line-height: 1; margin-bottom: 1.5rem;
+        }
+        .cap-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300; font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        .cap-body { font-size: 0.9rem; line-height: 1.75; color: var(--text-dim); font-weight: 300; }
+        .cap-tag {
+            display: inline-block; margin-top: 1.5rem;
+            font-size: 0.68rem; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--amber);
+            border-bottom: 1px solid var(--amber-dim); padding-bottom: 2px;
+        }
+
+        /* ── VIDEO SECTION ───────────────────────── */
+        .section-video { background: var(--bg-warm); padding: 8rem 2rem; text-align: center; }
+        .video-wrapper {
+            position: relative; max-width: 900px;
+            margin: 4rem auto 0;
+            border: 1px solid var(--border);
+        }
+        .video-wrapper::before {
+            content: ''; position: absolute;
+            top: -1px; left: -1px;
+            width: 20px; height: 20px;
+            border-top: 1px solid var(--amber);
+            border-left: 1px solid var(--amber);
+        }
+        .video-wrapper::after {
+            content: ''; position: absolute;
+            bottom: -1px; right: -1px;
+            width: 20px; height: 20px;
+            border-bottom: 1px solid var(--amber);
+            border-right: 1px solid var(--amber);
+        }
+        .video-wrapper video { width: 100%; display: block; }
+        .video-caption {
+            margin-top: 1.5rem; font-size: 0.75rem;
+            letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim);
+        }
+
+        /* ── STATS ───────────────────────────────── */
+        .section-stats {
+            background: var(--bg); padding: 6rem 2rem;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 2rem; text-align: center;
+        }
+        .stat-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200; font-size: clamp(2.5rem, 5vw, 4rem);
+            color: var(--amber); line-height: 1; margin-bottom: 0.5rem;
+        }
+        .stat-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+
+        /* ── CTA ─────────────────────────────────── */
+        .section-cta {
+            background: var(--bg-warm);
+            padding: 10rem 2rem; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .section-cta::before {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(232,130,26,0.07) 0%, rgba(139,26,0,0.05) 40%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-rings { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+        .cta-rings .r {
+            position: absolute; border-radius: 50%;
+            border: 1px solid rgba(232,130,26,0.06);
+            transform: translate(-50%,-50%);
+        }
+        .cta-content { position: relative; z-index: 1; }
+        .cta-eyeline { font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--amber); margin-bottom: 2rem; }
+        .cta-heading {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 200; font-size: clamp(3rem, 7vw, 5.5rem);
+            line-height: 1.1; margin-bottom: 2.5rem;
+        }
+        .cta-heading em { font-style: italic; color: var(--amber); }
+        .cta-sub { font-size: 1rem; color: var(--text-dim); max-width: 480px; margin: 0 auto 3rem; line-height: 1.7; font-weight: 300; }
+        .btn-primary {
+            display: inline-block; padding: 1rem 3rem;
+            background: var(--amber); color: var(--bg); text-decoration: none;
+            font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .btn-primary:hover { background: #F59328; transform: translateY(-2px); }
+        .btn-ghost {
+            display: inline-block; margin-left: 1.5rem;
+            padding: 1rem 2.5rem; border: 1px solid var(--amber-dim);
+            color: var(--text-dim); text-decoration: none;
+            font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .btn-ghost:hover { border-color: var(--amber); color: var(--text); }
+
+        /* ── FOOTER ──────────────────────────────── */
+        footer { background: var(--bg); padding: 4rem 3rem 2.5rem; border-top: 1px solid var(--border); }
+        .footer-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3rem; }
+        .footer-logo { font-family: 'Cormorant Garamond', serif; font-weight: 200; font-size: 1.8rem; letter-spacing: 0.25em; text-transform: uppercase; }
+        .footer-logo span { color: var(--amber); }
+        .footer-tagline { margin-top: 0.4rem; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+        .footer-links { display: flex; gap: 4rem; }
+        .footer-col h4 { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--amber); margin-bottom: 1rem; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li + li { margin-top: 0.6rem; }
+        .footer-col a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; font-weight: 300; transition: color 0.3s; }
+        .footer-col a:hover { color: var(--text); }
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .footer-copy { font-size: 0.75rem; color: var(--text-dim); }
+        .footer-iris { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+        .footer-iris-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); opacity: 0.6; }
+
+        /* ── SCROLL FADE-UP ──────────────────────── */
+        .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.9s ease, transform 0.9s ease; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── RESPONSIVE ──────────────────────────── */
+        @media (max-width: 900px) {
+            nav { padding: 1.2rem 1.5rem; }
+            .nav-links { display: none; }
+            .two-col { grid-template-columns: 1fr; gap: 3rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
+            .footer-top { flex-direction: column; gap: 2.5rem; }
+            .footer-links { gap: 2rem; flex-wrap: wrap; }
+            .btn-ghost { margin-left: 0; margin-top: 1rem; display: block; text-align: center; }
+            #iris-svg { width: 80vmin; height: 80vmin; }
+            #iris-glow { width: 90vmin; height: 90vmin; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────── -->
+<nav>
+    <a href="#" class="logo">Rec<span>o</span>llia</a>
+    <ul class="nav-links">
+        <li><a href="#capabilities">Capabilities</a></li>
+        <li><a href="#vision">Vision</a></li>
+        <li><a href="#demo">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Begin</a>
+</nav>
+
+<!-- ── IRIS HERO ─────────────────────────────── -->
+<section id="iris-hero">
+    <div id="iris-sticky">
+
+        <!-- ambient glow -->
+        <div id="iris-glow"></div>
+
+        <!-- chromatic aberration ghost layers -->
+        <svg id="iris-chroma-r" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="200" cy="200" r="130" fill="none" stroke="rgba(255,60,0,0.25)" stroke-width="1.5"/>
+            <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,60,0,0.2)"  stroke-width="1"/>
+            <circle cx="200" cy="200" r="75"  fill="none" stroke="rgba(255,60,0,0.15)" stroke-width="1"/>
+        </svg>
+        <svg id="iris-chroma-b" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="200" cy="200" r="130" fill="none" stroke="rgba(0,80,255,0.2)"  stroke-width="1.5"/>
+            <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(0,80,255,0.15)" stroke-width="1"/>
+            <circle cx="200" cy="200" r="75"  fill="none" stroke="rgba(0,80,255,0.1)"  stroke-width="1"/>
+        </svg>
+
+        <!-- MAIN IRIS SVG -->
+        <svg id="iris-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+            <defs>
+                <radialGradient id="irisGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"   stop-color="#8B1A00" stop-opacity="0.95"/>
+                    <stop offset="30%"  stop-color="#C45A0A" stop-opacity="0.9"/>
+                    <stop offset="60%"  stop-color="#E8821A" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#2A1000" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="pupilGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"   stop-color="#000000"/>
+                    <stop offset="70%"  stop-color="#060302"/>
+                    <stop offset="100%" stop-color="#120800" stop-opacity="0.9"/>
+                </radialGradient>
+                <radialGradient id="glowRing" cx="50%" cy="50%" r="50%">
+                    <stop offset="60%"  stop-color="transparent"/>
+                    <stop offset="85%"  stop-color="rgba(232,130,26,0.08)"/>
+                    <stop offset="100%" stop-color="transparent"/>
+                </radialGradient>
+                <filter id="blur-outer">
+                    <feGaussianBlur stdDeviation="0" result="blur"/>
+                </filter>
+
+                <!-- clip to iris circle -->
+                <clipPath id="irisClip">
+                    <circle cx="200" cy="200" r="168"/>
+                </clipPath>
+            </defs>
+
+            <!-- outer halo rings -->
+            <circle id="halo1" cx="200" cy="200" r="190" fill="none" stroke="rgba(139,26,0,0.12)" stroke-width="1"
+                stroke-dasharray="1195" stroke-dashoffset="1195"/>
+            <circle id="halo2" cx="200" cy="200" r="178" fill="none" stroke="rgba(139,26,0,0.08)" stroke-width="1"
+                stroke-dasharray="1119" stroke-dashoffset="1119"/>
+
+            <!-- iris body -->
+            <circle id="iris-body" cx="200" cy="200" r="168" fill="url(#irisGrad)" opacity="0"/>
+
+            <!-- outer fiber group (8 lines, slow clockwise) -->
+            <g id="fibers-outer" opacity="0" clip-path="url(#irisClip)">
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(45,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(90,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(135,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(180,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(225,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(270,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="32"  stroke="rgba(232,130,26,0.3)" stroke-width="0.5" transform="rotate(315,200,200)"/>
+            </g>
+
+            <!-- mid fiber group (16 lines, slow counter-clockwise) -->
+            <g id="fibers-mid" opacity="0" clip-path="url(#irisClip)">
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(22.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(45,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(67.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(90,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(112.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(135,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(157.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(180,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(202.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(225,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(247.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(270,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(292.5,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(315,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="50"  stroke="rgba(196,90,10,0.25)" stroke-width="0.4" transform="rotate(337.5,200,200)"/>
+            </g>
+
+            <!-- inner fiber group (very fine, slowest) -->
+            <g id="fibers-inner" opacity="0" clip-path="url(#irisClip)">
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(30,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(60,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(90,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(120,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(150,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(180,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(210,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(240,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(270,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(300,200,200)"/>
+                <line x1="200" y1="200" x2="200" y2="100" stroke="rgba(139,26,0,0.3)" stroke-width="0.35" transform="rotate(330,200,200)"/>
+            </g>
+
+            <!-- concentric rings — drawn in one by one -->
+            <circle id="ring1" cx="200" cy="200" r="155" fill="none" stroke="rgba(232,130,26,0.18)" stroke-width="1"
+                stroke-dasharray="974"  stroke-dashoffset="974"/>
+            <circle id="ring2" cx="200" cy="200" r="140" fill="none" stroke="rgba(232,130,26,0.22)" stroke-width="1"
+                stroke-dasharray="880"  stroke-dashoffset="880"/>
+            <circle id="ring3" cx="200" cy="200" r="120" fill="none" stroke="rgba(196,90,10,0.28)"  stroke-width="1"
+                stroke-dasharray="754"  stroke-dashoffset="754"/>
+            <circle id="ring4" cx="200" cy="200" r="100" fill="none" stroke="rgba(196,90,10,0.32)"  stroke-width="1"
+                stroke-dasharray="628"  stroke-dashoffset="628"/>
+            <circle id="ring5" cx="200" cy="200" r="82"  fill="none" stroke="rgba(139,26,0,0.38)"   stroke-width="1"
+                stroke-dasharray="515"  stroke-dashoffset="515"/>
+            <circle id="ring6" cx="200" cy="200" r="68"  fill="none" stroke="rgba(139,26,0,0.45)"   stroke-width="1.2"
+                stroke-dasharray="427"  stroke-dashoffset="427"/>
+
+            <!-- pupil -->
+            <circle id="pupil-outer" cx="200" cy="200" r="62" fill="url(#pupilGrad)" opacity="0"/>
+            <circle id="pupil-core"  cx="200" cy="200" r="56" fill="#000000"         opacity="0"/>
+
+            <!-- specular highlight -->
+            <ellipse id="specular" cx="178" cy="182" rx="7" ry="4.5"
+                fill="rgba(255,255,255,0.07)" transform="rotate(-20,178,182)" opacity="0"/>
+
+            <!-- glow ring overlay -->
+            <circle cx="200" cy="200" r="168" fill="url(#glowRing)"/>
+        </svg>
+
+        <!-- hero text -->
+        <div id="hero-text">
+            <h1>See Beyond.<br><em>Act Precisely.</em></h1>
+            <p>Perception at the depth of intelligence</p>
+        </div>
+
+        <!-- scroll cue -->
+        <div id="scroll-cue">
+            <span>Scroll</span>
+            <div class="cue-line"></div>
+        </div>
+
+        <!-- vignette & blackout overlays -->
+        <div id="iris-vignette"></div>
+        <div id="iris-blackout"></div>
+    </div>
+</section>
+
+<!-- ── TRANSITION QUOTE ───────────────────────── -->
+<div class="transition-quote fade-up">
+    <blockquote>
+        "The iris does not merely receive light —<br>
+        it <em>chooses</em> what enters."
+    </blockquote>
+    <p class="quote-attr">Recollia — Core Principle</p>
+</div>
+
+<div class="iris-divider"><div class="iris-ring"></div></div>
+
+<!-- ── INTRO / VISION ─────────────────────────── -->
+<section class="section-intro" id="vision">
+    <div class="container">
+        <div class="two-col">
+            <div class="fade-up">
+                <p class="section-label">What is Recollia</p>
+                <h2 class="section-heading">
+                    Intelligence that<br><em>perceives depth</em><br>where others see surface.
+                </h2>
+                <div class="section-body">
+                    <p>Recollia is built on a single conviction: that true intelligence begins not with processing power, but with the quality of perception. Like the iris that governs what enters the eye, our systems are designed to filter signal from noise with anatomical precision.</p>
+                    <p>We build AI that looks further in — past the obvious layer, past the comfortable pattern — and surfaces insight from the place where data becomes meaning.</p>
+                </div>
+            </div>
+
+            <!-- decorative iris -->
+            <div class="iris-illustration fade-up">
+                <svg viewBox="0 0 400 400" width="100%" height="100%">
+                    <defs>
+                        <radialGradient id="irisGrad2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"   stop-color="#8B1A00" stop-opacity="0.9"/>
+                            <stop offset="35%"  stop-color="#C45A0A" stop-opacity="0.85"/>
+                            <stop offset="65%"  stop-color="#E8821A" stop-opacity="0.75"/>
+                            <stop offset="100%" stop-color="#3A1A00" stop-opacity="0.6"/>
+                        </radialGradient>
+                        <radialGradient id="pupilGrad2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"  stop-color="#000000"/>
+                            <stop offset="80%" stop-color="#0a0503"/>
+                            <stop offset="100%" stop-color="#1a0a00" stop-opacity="0.8"/>
+                        </radialGradient>
+                        <clipPath id="irisClip2"><circle cx="200" cy="200" r="168"/></clipPath>
+                    </defs>
+                    <circle cx="200" cy="200" r="195" fill="none" stroke="rgba(139,26,0,0.15)" stroke-width="1"/>
+                    <circle cx="200" cy="200" r="178" fill="none" stroke="rgba(139,26,0,0.1)"  stroke-width="1"/>
+                    <circle cx="200" cy="200" r="168" fill="url(#irisGrad2)"/>
+                    <g opacity="0.35" stroke="#E8821A" stroke-width="0.6" clip-path="url(#irisClip2)">
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(0,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(15,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(30,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(45,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(60,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(75,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(90,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(105,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(120,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(135,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(150,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(165,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(180,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(195,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(210,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(225,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(240,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(255,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(270,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(285,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(300,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(315,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(330,200,200)"/>
+                        <line x1="200" y1="200" x2="200" y2="32" transform="rotate(345,200,200)"/>
+                    </g>
+                    <circle cx="200" cy="200" r="130" fill="none" stroke="rgba(232,130,26,0.2)" stroke-width="1"/>
+                    <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(196,90,10,0.25)" stroke-width="1"/>
+                    <circle cx="200" cy="200" r="75"  fill="none" stroke="rgba(139,26,0,0.3)"  stroke-width="1"/>
+                    <circle cx="200" cy="200" r="65" fill="url(#pupilGrad2)"/>
+                    <circle cx="200" cy="200" r="60" fill="#000"/>
+                    <ellipse cx="178" cy="182" rx="8" ry="5" fill="rgba(255,255,255,0.06)" transform="rotate(-20,178,182)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="iris-divider"><div class="iris-ring"></div></div>
+
+<!-- ── CAPABILITIES ───────────────────────────── -->
+<section class="section-capabilities" id="capabilities">
+    <div class="container">
+        <div class="section-header fade-up">
+            <p class="section-label">What we build</p>
+            <h2 class="section-heading">Six depths of <em>perception</em></h2>
+        </div>
+        <div class="cards-grid">
+            <div class="cap-card fade-up">
+                <div class="cap-number">01</div>
+                <h3 class="cap-title">Establish</h3>
+                <p class="cap-body">Before acting, Recollia establishes full context. We map the whole picture — warm, wide, without assumption — before the lens tightens.</p>
+                <span class="cap-tag">Context Architecture</span>
+            </div>
+            <div class="cap-card fade-up">
+                <div class="cap-number">02</div>
+                <h3 class="cap-title">Approach</h3>
+                <p class="cap-body">Radial detail emerges. Our models move closer to the signal, making edge boundaries visible that feel like hard limits — but are doors.</p>
+                <span class="cap-tag">Signal Resolution</span>
+            </div>
+            <div class="cap-card fade-up">
+                <div class="cap-number">03</div>
+                <h3 class="cap-title">Edge of the Well</h3>
+                <p class="cap-body">Where most systems stop, Recollia stretches. Fibers of data that seem fixed begin to move — revealing motion within apparent stillness.</p>
+                <span class="cap-tag">Deep Pattern Recognition</span>
+            </div>
+            <div class="cap-card fade-up">
+                <div class="cap-number">04</div>
+                <h3 class="cap-title">Falling In</h3>
+                <p class="cap-body">The structure becomes a flowing tunnel. Strands pull inward like energy fields. This is where insight accelerates beyond linear extrapolation.</p>
+                <span class="cap-tag">Predictive Intelligence</span>
+            </div>
+            <div class="cap-card fade-up">
+                <div class="cap-number">05</div>
+                <h3 class="cap-title">Near the Center</h3>
+                <p class="cap-body">Walls darken. Colour fades to essence. The system has stripped away ambient noise and is operating at its most precise, most powerful state.</p>
+                <span class="cap-tag">Core Inference</span>
+            </div>
+            <div class="cap-card fade-up">
+                <div class="cap-number">06</div>
+                <h3 class="cap-title">Into Black</h3>
+                <p class="cap-body">The camera fully enters. Pitch black. A brief hold. Then the answer surfaces — not as data, but as clarity. This is the Recollia output.</p>
+                <span class="cap-tag">Decision Synthesis</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── VIDEO EXPERIENCE ───────────────────────── -->
+<section class="section-video" id="demo">
+    <div class="container">
+        <div class="fade-up">
+            <p class="section-label">The Experience</p>
+            <h2 class="section-heading" style="text-align:center;">Watch the <em>depth unfold</em></h2>
+            <p class="section-body" style="text-align:center;max-width:560px;margin:0 auto;">
+                This is what Recollia sees. Not the surface of things — the architecture beneath.
+            </p>
+        </div>
+        <div class="video-wrapper fade-up">
+            <video autoplay loop muted playsinline>
+                <source src="Firefly Extreme close-up of an eye iris with a deep black pupil in the center.__The iris has radial.mp4" type="video/mp4">
+            </video>
+        </div>
+        <p class="video-caption">Iris depth — Recollia visual identity</p>
+    </div>
+</section>
+
+<!-- ── STATS ──────────────────────────────────── -->
+<section class="section-stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="fade-up"><div class="stat-value">6</div><div class="stat-label">Layers of depth</div></div>
+            <div class="fade-up"><div class="stat-value">∞</div><div class="stat-label">Frames of perception</div></div>
+            <div class="fade-up"><div class="stat-value">01</div><div class="stat-label">Iris. One truth.</div></div>
+            <div class="fade-up"><div class="stat-value">0</div><div class="stat-label">Surface-level answers</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────── -->
+<section class="section-cta" id="contact">
+    <div class="cta-rings">
+        <div class="r" style="width:800px;height:800px;top:50%;left:50%"></div>
+        <div class="r" style="width:600px;height:600px;top:50%;left:50%"></div>
+        <div class="r" style="width:400px;height:400px;top:50%;left:50%"></div>
+        <div class="r" style="width:250px;height:250px;top:50%;left:50%"></div>
+    </div>
+    <div class="cta-content fade-up">
+        <p class="cta-eyeline">Begin your journey</p>
+        <h2 class="cta-heading">The pupil is<br><em>open.</em></h2>
+        <p class="cta-sub">Recollia works with founders, teams, and organisations who need intelligence that goes deeper than the obvious layer.</p>
+        <div>
+            <a href="mailto:karthikeyan@recollia.ai" class="btn-primary">Request Access</a>
+            <a href="#vision" class="btn-ghost">Learn More</a>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+    <div class="container">
+        <div class="footer-top">
+            <div>
+                <div class="footer-logo">Rec<span>o</span>llia</div>
+                <div class="footer-tagline">See Beyond. Act Precisely.</div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Vision</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Capabilities</a></li>
+                        <li><a href="#">Use Cases</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:karthikeyan@recollia.ai">karthikeyan@recollia.ai</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copy">© 2026 Recollia. All rights reserved.</p>
+            <div class="footer-iris">
+                <div class="footer-iris-dot"></div>
+                Depth-first intelligence
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ── SCRIPTS ────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── helpers ────────────────────────────────────
+const $ = id => document.getElementById(id);
+const iris    = $('iris-svg');
+const glow    = $('iris-glow');
+const chromaR = $('iris-chroma-r');
+const chromaB = $('iris-chroma-b');
+const heroTxt = $('hero-text');
+const cueTxt  = $('scroll-cue');
+const blackout= $('iris-blackout');
+const vignette= $('iris-vignette');
+
+// ── ENTRY ANIMATION (no scroll) ────────────────
+// rings draw in sequence, then fibers fade, then text
+const entry = gsap.timeline({ delay: 0.3 });
+
+// halo rings
+entry.to([$('halo1'), $('halo2')], {
+    strokeDashoffset: 0, duration: 1.2, stagger: 0.2, ease: 'power2.out'
+}, 0);
+
+// iris body fades in
+entry.to($('iris-body'), { opacity: 1, duration: 1.0, ease: 'power1.in' }, 0.4);
+
+// concentric rings, outer → inner
+entry.to([$('ring1'),$('ring2'),$('ring3'),$('ring4'),$('ring5'),$('ring6')], {
+    strokeDashoffset: 0, duration: 0.9, stagger: 0.12, ease: 'power2.out'
+}, 0.5);
+
+// fiber groups
+entry.to([$('fibers-outer'),$('fibers-mid'),$('fibers-inner')], {
+    opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power1.out'
+}, 1.0);
+
+// pupil
+entry.to([$('pupil-outer'),$('pupil-core')], {
+    opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power2.in'
+}, 1.3);
+
+// specular
+entry.to($('specular'), { opacity: 1, duration: 0.4 }, 1.8);
+
+// glow bloom
+entry.to(glow, { opacity: 1, duration: 1.2, ease: 'power1.out' }, 0.8);
+
+// hero text rises in
+entry.from(heroTxt, { y: 20, opacity: 0, duration: 1.0, ease: 'power2.out' }, 1.5);
+entry.from(cueTxt,  { opacity: 0, duration: 0.8, ease: 'power1.out' }, 2.2);
+
+
+// ── SCROLL SEQUENCE ────────────────────────────
+const hero = $('iris-hero');
+
+// Stage 1  (0→20%)  — zoom iris to full viewport
+ScrollTrigger.create({
+    trigger: hero, start: 'top top', end: '20% top',
+    scrub: 1.2,
+    onUpdate(self) {
+        const p = self.progress;
+        // scale from 1 → ~2.8  (60vmin → fills viewport)
+        const s = 1 + p * 1.8;
+        gsap.set(iris, { scale: s });
+        gsap.set(glow, { scale: s * 0.9, opacity: 1 - p * 0.2 });
+        // text fades out
+        gsap.set(heroTxt, { opacity: 1 - p * 3 });
+        gsap.set(cueTxt,  { opacity: 1 - p * 4 });
+        // glow intensifies
+        glow.style.background = `radial-gradient(circle,
+            rgba(139,26,0,${0.35 + p * 0.3}) 0%,
+            rgba(232,130,26,${0.12 + p * 0.15}) 35%,
+            transparent 70%)`;
+    }
+});
+
+// Stage 2  (20→50%) — push past, mid-rings visible, blur outer edges
+ScrollTrigger.create({
+    trigger: hero, start: '20% top', end: '50% top',
+    scrub: 1.4,
+    onUpdate(self) {
+        const p  = self.progress;
+        const s  = 2.8 + p * 3.5;  // keeps growing
+        gsap.set(iris, { scale: s });
+        // blur outer ring slightly as we push in
+        iris.style.filter = `blur(${p * 1.5}px)`;
+        // vignette tightens
+        gsap.set(vignette, { opacity: 0.5 + p * 0.4 });
+    }
+});
+
+// Stage 3  (50→75%) — chromatic split, pupil dominates
+ScrollTrigger.create({
+    trigger: hero, start: '50% top', end: '75% top',
+    scrub: 1.4,
+    onUpdate(self) {
+        const p = self.progress;
+        const s = 6.3 + p * 5;
+        gsap.set(iris, { scale: s });
+
+        // chromatic aberration ghost layers
+        const offset = p * 28;
+        gsap.set(chromaR, {
+            scale: s * 0.98,
+            x: offset, y: -offset * 0.4,
+            opacity: p * 0.55
+        });
+        gsap.set(chromaB, {
+            scale: s * 0.98,
+            x: -offset, y: offset * 0.4,
+            opacity: p * 0.45
+        });
+
+        // deep red bloom behind
+        glow.style.background = `radial-gradient(circle,
+            rgba(139,26,0,${0.6 + p * 0.35}) 0%,
+            rgba(80,10,0,${0.25 + p * 0.3}) 50%,
+            transparent 75%)`;
+        gsap.set(glow, { scale: s * 0.3, opacity: 0.8 + p * 0.2 });
+
+        iris.style.filter = `blur(${1.5 + p * 3}px)`;
+    }
+});
+
+// Stage 4  (75→100%) — total blackout
+ScrollTrigger.create({
+    trigger: hero, start: '75% top', end: '95% top',
+    scrub: 1.2,
+    onUpdate(self) {
+        const p = self.progress;
+        gsap.set(blackout, { opacity: p });
+        gsap.set(chromaR,  { opacity: (1-p) * 0.55 });
+        gsap.set(chromaB,  { opacity: (1-p) * 0.45 });
+    }
+});
+
+
+// ── SCROLL FADE-UP OBSERVER ─────────────────────
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
