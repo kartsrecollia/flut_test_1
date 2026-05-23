@@ -853,6 +853,65 @@
             border-color: var(--amber);
         }
 
+        /* ── SPLASH ──────────────────────────────── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            cursor: pointer;
+            transition: opacity 0.9s ease;
+        }
+
+        #splash.out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #splash-wordmark {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-weight: 300;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--ivory);
+        }
+
+        #splash-wordmark span {
+            color: var(--amber);
+        }
+
+        #splash-tagline {
+            font-family: 'Fraunces', serif;
+            font-optical-sizing: auto;
+            font-style: italic;
+            font-weight: 200;
+            font-size: 0.95rem;
+            color: var(--ivory-dim);
+            letter-spacing: 0.06em;
+        }
+
+        #splash-enter {
+            margin-top: 2.5rem;
+            font-size: 0.62rem;
+            letter-spacing: 0.36em;
+            text-transform: uppercase;
+            color: var(--ivory-dim);
+            opacity: 0.5;
+            animation: splashPulse 2.2s ease-in-out infinite;
+        }
+
+        @keyframes splashPulse {
+            0%, 100% { opacity: 0.25; }
+            50%       { opacity: 0.75; }
+        }
+
         @media (max-width: 900px) {
             nav {
                 padding: 1.2rem 1.5rem;
@@ -897,6 +956,13 @@
 </head>
 
 <body>
+
+    <!-- ── SPLASH ────────────────────────────────── -->
+    <div id="splash">
+        <div id="splash-wordmark">Rec<span>o</span>llia</div>
+        <div id="splash-tagline">Medicine, remembered.</div>
+        <div id="splash-enter">touch anywhere</div>
+    </div>
 
     <nav id="main-nav">
         <a href="#" class="nav-brand">
@@ -962,9 +1028,6 @@
                 <circle id="pupil-outer" cx="200" cy="200" r="50" fill="url(#pG)" opacity="0" />
                 <circle id="pupil-core" cx="200" cy="200" r="45" fill="#000000" opacity="0" />
 
-                <!-- Specular highlight (index 9 design) -->
-                <ellipse id="specular" cx="190" cy="192" rx="6.5" ry="4" fill="rgba(240,226,204,0.07)"
-                    transform="rotate(-22,190,192)" opacity="0" />
             </svg>
 
             <div id="hero-tagline">
@@ -1042,9 +1105,6 @@
                         <!-- Pupil (index 9: r=50/45) -->
                         <circle cx="200" cy="200" r="50" fill="url(#pG2)" />
                         <circle cx="200" cy="200" r="45" fill="#000" />
-                        <!-- Specular highlight -->
-                        <ellipse cx="190" cy="192" rx="7" ry="4.5" fill="rgba(240,226,204,0.06)"
-                            transform="rotate(-22,190,192)" />
                     </svg>
                 </div>
             </div>
@@ -1154,9 +1214,6 @@
             <!-- Pupil (index 9: r=50/45) -->
             <circle cx="200" cy="200" r="50" fill="url(#pG3)" />
             <circle cx="200" cy="200" r="45" fill="#000" />
-            <!-- Specular highlight -->
-            <ellipse cx="190" cy="192" rx="7.5" ry="4.5" fill="rgba(240,226,204,0.06)"
-                transform="rotate(-22,190,192)" />
         </svg>
         <div class="iris-moment-caption">
             <p><em>Topic mastered.</em> This is what it feels like.</p>
@@ -1301,7 +1358,7 @@
         const chromaR = document.getElementById('iris-chroma-r');
         const chromaB = document.getElementById('iris-chroma-b');
 
-        const entry = gsap.timeline({ delay: 0.25 });
+        const entry = gsap.timeline({ paused: true });
         entry.to(document.getElementById('iris-body'), {
             opacity: 1, duration: 1.1, ease: 'power1.in'
         }, 0.4);
@@ -1312,7 +1369,6 @@
         entry.to([document.getElementById('pupil-outer'), document.getElementById('pupil-core')], {
             opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power2.in'
         }, 1.3);
-        entry.to(document.getElementById('specular'), { opacity: 1, duration: 0.4 }, 1.85);
         entry.to(glowEl, { opacity: 1, duration: 1.3, ease: 'power1.out' }, 0.7);
         entry.from(taglineEl, { y: 18, opacity: 0, duration: 1.1, ease: 'power2.out' }, 1.6);
         entry.from(cueEl, { opacity: 0, duration: 0.8, ease: 'power1.out' }, 2.3);
@@ -1453,6 +1509,26 @@
             });
         }, { threshold: 0.14 });
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+
+    <script>
+        (function () {
+            const splash = document.getElementById('splash');
+            // # and spaces in the filename must be percent-encoded so the browser
+            // does not treat # as a URL fragment
+            const gong = new Audio('../assets/audio/' + encodeURIComponent('Gong  Sound Effect Source #soundeffect #soundeffects.mp3'));
+            gong.volume = 0.6;
+
+            splash.addEventListener('click', function () {
+                // Dismiss splash
+                splash.classList.add('out');
+                setTimeout(() => { if (splash.parentNode) splash.remove(); }, 900);
+
+                // Start eye animation and gong simultaneously
+                entry.play();
+                gong.play().catch(() => {});
+            }, { once: true });
+        })();
     </script>
 </body>
 
